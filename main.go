@@ -21,7 +21,7 @@ func main() {
 	plugin.Param("workspace", w)
 	plugin.MustParse()
 
-	c := exec.Command("/bin/dep", d.Task, d.Stage)
+	c := exec.Command("/usr/bin/php", "/bin/dep", d.Task, d.Stage)
 	c.Path = w.Path
 
 	err := c.Run()
