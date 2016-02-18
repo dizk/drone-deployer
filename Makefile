@@ -29,4 +29,7 @@ docker:
 $(EXECUTABLE): $(wildcard *.go)
 	go build -ldflags '-s -w $(LDFLAGS)'
 
+docker-push: docker
+	docker push $(IMAGE)
+
 build: $(EXECUTABLE)
