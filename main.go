@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"bytes"
+	"log"
 	"os/exec"
 
 	"github.com/drone/drone-plugin-go/plugin"
@@ -24,11 +24,16 @@ func main() {
 	c := exec.Command("/usr/bin/php", "/bin/dep", d.Task, d.Stage)
 	c.Dir = w.Path
 
-	err := c.Run()
-	if err != nil {
-		fmt.Println("Error!")
-		fmt.Println(err)
-		os.Exit(1)
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	c.Stdout = &stdout
+	c.Stderr = &stderr
+
+	if err := c.Run(); err != nil {
+		log.Fatal(stderr.String())
+		log.Fatal(err)
 	}
-	fmt.Println("Command completed successfully")
+
+	log.Println(stdout.String())
+	log.Println("Command completed successfully")
 }
