@@ -1,14 +1,19 @@
 package main
 
 import (
-	"bytes"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 
 	"github.com/drone/drone-plugin-go/plugin"
+	"github.com/kr/pty"
 )
+
+// SSHConfig the config used on the test runner
+var SSHConfig = `Host *
+    StrictHostKeyChecking no`
 
 type deployer struct {
 	Task  string `json:"task"`
@@ -28,6 +33,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := ioutil.WriteFile("/root/.ssh/config", []byte(SSHConfig), 0644); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := ioutil.WriteFile("/root/.ssh/id_rsa", []byte(w.Keys.Private), 0600); err != nil {
 		log.Fatal(err)
 	}
@@ -39,16 +48,15 @@ func main() {
 	c := exec.Command("/usr/bin/php", "/bin/dep", d.Task, d.Stage)
 	c.Dir = w.Path
 
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	c.Stdout = &stdout
-	c.Stderr = &stderr
-
-	if err := c.Run(); err != nil {
-		log.Fatal(stderr.String())
+	f, err := pty.Start(c)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println(stdout.String())
+	// Seems to always return an error
+	// read /dev/ptmx: input/output error
+	// So no error checking
+	io.Copy(os.Stdout, f)
+
 	log.Println("Command completed successfully")
 }

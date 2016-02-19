@@ -7,3 +7,12 @@ deploy:
     stage: staging
 
 ```
+
+If using the common recipe you must set `writable_use_sudo` to false. Ex:
+
+```php
+require 'recipe/common.php';
+
+// Drone
+set('writable_use_sudo', false);
+```
