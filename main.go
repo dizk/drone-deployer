@@ -1,14 +1,12 @@
 package main
 
 import (
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 
 	"github.com/drone/drone-plugin-go/plugin"
-	"github.com/kr/pty"
 )
 
 // SSHConfig the config used on the test runner
@@ -45,18 +43,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c := exec.Command("/usr/bin/php", "/bin/dep", d.Task, d.Stage)
+	c := exec.Command("/bin/dep", "-n", d.Task, d.Stage)
 	c.Dir = w.Path
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
 
-	f, err := pty.Start(c)
+	err := c.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Seems to always return an error
-	// read /dev/ptmx: input/output error
-	// So no error checking
-	io.Copy(os.Stdout, f)
 
 	log.Println("Command completed successfully")
 }
