@@ -43,7 +43,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c := exec.Command("/usr/bin/php", "/bin/dep", d.Task, d.Stage)
+	c := exec.Command("/bin/dep", "-n", d.Task, d.Stage)
 	c.Dir = w.Path
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
